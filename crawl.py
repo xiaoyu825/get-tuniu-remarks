@@ -58,6 +58,7 @@ def get_remark_page(productId,productType,page):
         'page':page
     }
     url='http://www.tuniu.com/papi/product/remarkList?'+urlencode(data)
+    print(url)
     if (productId == '20545063'):
         print(url)
     try:
@@ -83,6 +84,7 @@ def prase_remark(html):
     for itemold in items:
         tup = ('','')
         item = itemold+tup
+        # print(item)
         yield{
             'remarkid':item[0],
             'productName':item[1],
@@ -105,12 +107,13 @@ def get_remark(prams):
     for group in groups:
         html = get_remark_page(productId, 1, group)
         # print(html)
+        print(1111)
         for item in prase_remark(html):
             lists.append(item)
-    # print(lists)
-    write_to_file(lists)
+    print(lists)
+    # write_to_file(lists)
 
-    #save_to_mysql(lists)
+    save_to_mysql(lists)
     # return lists
 
 def getproduct_id(html):
@@ -126,10 +129,10 @@ def getproduct_id(html):
         product_ids.extend(items)
     return product_ids
 def save_to_mysql(lists):
-    db = pymysql.connect(host="localhost", user="root", password="123456", db="tuniu", charset="utf8mb4")
+    db = pymysql.connect(host="localhost", user="root", password="825365", db="spiders", charset="utf8mb4")
     cursor = db.cursor()
     for i in lists:
-        sql = "INSERT INTO remark(remarkid,productName,remarkTime,remarkChannelName,productCategoryName,remark,nickname,polarity,level) VALUES(\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\')" % (i["remarkid"], i["productName"], i["remarkTime"], i["remarkChannelName"], i["productCategoryName"], i["remark"],i["nickname"],i["polarity"],i["level"])
+        sql = "INSERT INTO remark1(remarkid,productName,remarkTime,remarkChannelName,productCategoryName,remark,nickname,polarity,level) VALUES(\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\')" % (i["remarkid"], i["productName"], i["remarkTime"], i["remarkChannelName"], i["productCategoryName"], i["remark"],i["nickname"],i["polarity"],i["level"])
         # print(sql)
         try:
             cursor.execute(sql)
@@ -141,10 +144,10 @@ def save_to_mysql(lists):
     db.close()
 
 def main():
-    db = pymysql.connect(host="localhost", user="root", password="123456", db="tuniu", charset="utf8mb4")
+    db = pymysql.connect(host="localhost", user="root", password="825365", db="spiders", charset="utf8mb4")
     cursor = db.cursor()
-    cursor.execute("DROP TABLE IF EXISTS remark")
-    createTab = """CREATE TABLE remark(
+    cursor.execute("DROP TABLE IF EXISTS remark1")
+    createTab = """CREATE TABLE remark1(
                             id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
                             remarkid VARCHAR(100) NOT NULL,
                             productName VARCHAR(500) NOT NULL,
@@ -159,21 +162,23 @@ def main():
     cursor.execute(createTab)
     db.close()
     prams = []
-    #citys = ['g906', 'g3300','g414','g700']
-    citys = ['g906']
+    citys = ['g906','g3910', 'g3300','g414','g700','g3312','g3905']
+    # citys = ['g906']
     for city in citys:
-        for i in range(1):
+        for i in range(5):
             #获取到某个城市的旅游线路的某一页的地址
             url = 'http://www.tuniu.com/'+str(city)+'/tours-nj-0/list-h0-i-j0_0/' + str(i + 1) + '/'
+            print(url)
             html=get_oneHTML_page(url)
             for productId in getproduct_id(html):
-                #print(productId)
+                print(productId)
                 groups = [x for x in range(GROUP_START, GROUP_END + 1)]
                 pram =[]
                 pram.append(productId)
                 groups = map(str, groups)
                 pram.extend(groups)
                 prams.append(pram)
+            # print(prams)
     pool = Pool()
     pool.map(get_remark, prams)
 
