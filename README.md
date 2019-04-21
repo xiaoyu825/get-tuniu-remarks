@@ -1,2 +1,2 @@
-# TuniuRemark
-使用Python3爬取途牛网的评论，没有使用爬虫框架，仅作为练手项目。使用requests爬取页面，re进行匹配，使用MySQL或者Mongodb存储
+# 大数据作业2 #
+爬取途牛网的评论，并且存入到MySQL中
